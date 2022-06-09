@@ -8,6 +8,11 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 
 import org.springframework.beans.factory.annotation.Value;
 
@@ -27,19 +32,16 @@ public class Account {
 	
 	@Id
 	private String accountNo;
-	private String ifscCode; 
+	private String ifscCode;
 	private String bankName;
+	@NotNull
 	private double balance;
 	@ManyToOne(cascade = CascadeType.ALL,targetEntity = Wallet.class) 
 	@JoinColumn(name="walletId")
 	private Wallet walletId;
-	/**
-	 * @param accountNo
-	 * @param ifscCode
-	 * @param bankName
-	 * @param balance
-	 * @param walletId
-	 */
+
+	
+	
 	public Account(AccountDTO a,Wallet walletId) {
 		super();
 		this.accountNo = a.getAccountNo();

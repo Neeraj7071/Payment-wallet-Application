@@ -40,6 +40,8 @@ public class AccountServiceImpl implements AccountService {
 		Account existingAccount= aDao.findByAccountNo(accountId);
 		if(existingAccount.getWalletId()==wallet) {
 			existingAccount.setWalletId(null);
+			wallet.setBank(null);
+			wDao.save(wallet);
 			aDao.save(existingAccount);
 			aDao.delete(existingAccount);
 			return new AccountDTO(existingAccount);			
@@ -119,6 +121,8 @@ public class AccountServiceImpl implements AccountService {
 				Account a1=aDao.findByAccountNo(accountNo2);
 				if(a==null)
 					throw new AccountException("No Account available please this accountNo ");
+				else if(a==a1)
+					throw new AccountException("Cound not send same account ");
 				a1.setBalance(a1.getBalance()+money);
 				a.setBalance(a.getBalance()-money);
 				Transaction myTransaction = new Transaction();
@@ -143,7 +147,17 @@ public class AccountServiceImpl implements AccountService {
 				throw new AccountException("insufficient balance in your account please select another account");
 		}
 		else
-			throw new AccountException("No Account available please this accountNo with your wallet");
+			throw new AccountException("No Account available  this accountNo with your wallet");
+	}
+
+	@Override
+	public Wallet updateAccount(String accountNo, Wallet w) throws AccountException {
+		Account a=aDao.findByAccountNo(accountNo);
+		if(a!=null && a.getWalletId().getNumber()==w.getNumber()) {
+			w.setBank(accountNo);
+			return wDao.save(w);			
+		}
+		throw new AccountException("No Account available  this accountNo with your wallet");
 	}
 
 //	@Override

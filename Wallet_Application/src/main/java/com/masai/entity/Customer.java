@@ -1,10 +1,15 @@
 package com.masai.entity;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
+import com.masai.DTO.CustomerDTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,20 +19,24 @@ import lombok.ToString;
 @Entity
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
+//@AllArgsConstructor
 @ToString
 public class Customer {
 	
 	@Id
-	@Min(value=9, message="Mobile should be 10 digit")
 	private String mobileNumber;
-	@NotNull(message="Name should be not null")
 	private String name;
-	@NotNull(message="Password Should be not Null")
 	private String password;
-//	@Column(columnDefinition = "Wallet default null")
-//	@JoinColumn(name="walletId")
-//	@Column(columnDefinition = "varchar(15) default null")
-//	private String wallet;
+	@OneToOne(cascade = CascadeType.ALL,targetEntity = Wallet.class) 
+	@JoinColumn(name="walletId")
+	private Wallet wallet;
+	
+	public Customer(CustomerDTO c,Wallet w) {
+		super();
+		this.mobileNumber = c.getMobileNo();
+		this.name = c.getName();
+		this.password = c.getPassword();
+		this.wallet = w;
+	}
 	
 }

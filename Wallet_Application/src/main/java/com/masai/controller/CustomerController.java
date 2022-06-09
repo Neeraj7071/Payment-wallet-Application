@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.masai.DTO.CustomerDTO;
 import com.masai.DTO.LoginDTO;
 import com.masai.entity.Customer;
 import com.masai.entity.UserSession;
@@ -39,7 +40,7 @@ public class CustomerController {
 //		return "Hello buddy this is testing";
 //	}
 	@PostMapping("userlogin")
-	public ResponseEntity<UserSession> loginSession(@RequestBody LoginDTO cusD){
+	public ResponseEntity<UserSession> loginSession(@Valid @RequestBody LoginDTO cusD){
 		
 		return new ResponseEntity<>(login.loginService(cusD),HttpStatus.OK);
 	}
@@ -49,7 +50,7 @@ public class CustomerController {
 	}
 	
 	@PostMapping("/customers")
-	public ResponseEntity<Customer> createAccount(@Valid @RequestBody Customer cs){
+	public ResponseEntity<Customer> createAccount(@Valid @RequestBody CustomerDTO cs){
 		return new ResponseEntity<>(csi.createAcc(cs),HttpStatus.CREATED);
 	}
 	
@@ -85,7 +86,7 @@ public class CustomerController {
 		return new ResponseEntity<>(csi.getListCustomer(key),HttpStatus.OK);
 	}
 	@PatchMapping("/customers/update")
-	public ResponseEntity<Customer> updateAccount(@Valid @RequestBody Customer cs,@RequestParam("key") String key){
+	public ResponseEntity<Customer> updateAccount(@Valid @RequestBody CustomerDTO cs,@RequestParam("key") String key){
 		UserSession user=userDao.findByUuid(key);
 		if(user==null) {
 			throw new CustomerNotFoundException("You are not authoraised person please login first.");

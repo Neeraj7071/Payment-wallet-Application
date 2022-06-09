@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.security.auth.login.AccountException;
+import javax.validation.Valid;
+import javax.validation.constraints.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -82,11 +84,31 @@ public class WalletController {
 		return "Your wallet balance "+w.getBalance();
 	}
 	
-
+	@GetMapping("ShowAccount")
+	public AccountDTO showAccountBalance(@RequestParam("key") String key) throws AccountException{
+		UserSession user=userDao.findByUuid(key);
+		if(user==null) {
+			throw new CustomerNotFoundException("You are not authoraised person please login first.");
+		}
+		LocalDateTime prev=user.getDateTime();
+		LocalDateTime date=LocalDateTime.now();
+		if (prev.getDayOfMonth() != date.getDayOfMonth()) {
+			userDao.delete(user);
+			throw new CustomerNotFoundException("Your session is expired please login again");
+		}
+		String number=user.getMobile();
+		Customer c=csi.findBymobileNumber(number);
+		Wallet w=wDao.getById(c.getMobileNumber());
+		if(w.getBank()==null ||w.getBank()==null)
+			throw new CustomerNotFoundException("No account Available this wallet no "+w.getNumber());
+		return aAccount.getAccountByAccountNo(w.getBank(),w);
+	}
 	
 	
 	@GetMapping("depositAmount/{accountNo}/{money}")
-	public AccountDTO debitMoneyFromAccount(@RequestParam("key") String key,@PathVariable("accountNo") String accountNo,@PathVariable("money") double money) throws AccountException{
+	public AccountDTO debitMoneyFromAccount(@RequestParam("key") String key,@Valid@PathVariable("accountNo")
+	@Pattern(regexp = "^[0-9]{6,20}",message="Invalid Account Number Foramateaa")
+	String accountNo,@PathVariable("money") double money) throws AccountException{
 		UserSession user=userDao.findByUuid(key);
 		if(user==null) {
 			throw new CustomerNotFoundException("You are not authoraised person please login first.");
@@ -103,7 +125,10 @@ public class WalletController {
 		return aAccount.removeMoneyFromAccount(accountNo, w, money);
 	}
 	@GetMapping("fundTransferAccountToAccount/{accountNo1}/{accountNo2}/{money}")
-	public AccountDTO sendMoneyInAccount(@RequestParam("key") String key,@PathVariable("accountNo1") String accountNo1,@PathVariable("accountNo2") String accountNo2,@PathVariable("money") double money) throws AccountException{
+	public AccountDTO sendMoneyInAccount(@RequestParam("key") String key,@Valid@PathVariable("accountNo1")
+	@Pattern(regexp = "^[0-9]{6,20}",message="Invalid Account Number Foramateaa")
+	String accountNo1,@Valid@PathVariable("accountNo2")
+	@Pattern(regexp = "^[0-9]{6,20}",message="Invalid Account Number Foramateaa")String accountNo2,@PathVariable("money") double money) throws AccountException{
 		if(accountNo1==accountNo2)
 			throw new CustomerNotFoundException("can not send same account");
 		UserSession user=userDao.findByUuid(key);
@@ -127,7 +152,9 @@ public class WalletController {
 	
 	
 	@GetMapping("fundTransferAccountToMobile/{accountNo}/{mobileNo}/{money}")
-	public AccountDTO sendToMobile(@RequestParam("key") String key,@PathVariable("accountNo") String accountNo,@PathVariable("mobileNo") String mobileNo,@PathVariable("money") double money) throws AccountException{
+	public AccountDTO sendToMobile(@RequestParam("key") String key,@Valid@PathVariable("accountNo")
+	@Pattern(regexp = "^[0-9]{6,20}",message="Invalid Account Number Foramateaa")
+	String accountNo,@PathVariable("mobileNo") String mobileNo,@PathVariable("money") double money) throws AccountException{
 		UserSession user=userDao.findByUuid(key);
 		if(user==null) {
 			throw new CustomerNotFoundException("You are not authoraised person please login first.");
@@ -144,7 +171,8 @@ public class WalletController {
 	}
 	
 	@GetMapping("fundTransferMobileToMobile/{mobileNo}/{money}")
-	public AccountDTO sendMoneyToMobile(@RequestParam("key") String key,@PathVariable("mobileNo") String mobile,@PathVariable("mobileNo") String mobileNo,@PathVariable("money") double money) throws AccountException{
+	public AccountDTO sendMoneyToMobile(@RequestParam("key") String key,@Valid@PathVariable("mobileNo")
+	@Pattern(regexp = "^[0-9]{10}",message="Invalid Mobile Number Foramateaa")String mobile,@PathVariable("mobileNo") String mobileNo,@PathVariable("money") double money) throws AccountException{
 		UserSession user=userDao.findByUuid(key);
 		if(user==null) {
 			throw new CustomerNotFoundException("You are not authoraised person please login first.");
@@ -157,11 +185,13 @@ public class WalletController {
 		}
 		Wallet w=wDao.getById(user.getMobile());
 //		return aAccount.sendMoneyUsingMobileNo(wDao.getById(c1.getMobileNumber()),wDao.getById(c2.getMobileNumber()), money);
-		return aAccount.sendMoneyInAccount(w.getBank(), wDao.getById(mobile).getBank(), w, money);
+		return aAccount.sendMoneyInAccount(w.getBank(), wDao.getById(mobileNo).getBank(), w, money);
 	}
 	
 	@GetMapping("updateAccount/{accountNo}")
-	public AccountDTO changeAccount(@RequestParam("key") String key,@PathVariable("accountNo") String account) throws AccountException{
+	public Wallet changeAccount(@RequestParam("key") String key,@Valid@PathVariable("accountNo")
+	@Pattern(regexp = "^[0-9]{6,20}",message="Invalid Account Number Foramateaa")
+	String account) throws AccountException{
 		UserSession user=userDao.findByUuid(key);
 		if(user==null) {
 			throw new CustomerNotFoundException("You are not authoraised person please login first.");
@@ -173,6 +203,7 @@ public class WalletController {
 			throw new CustomerNotFoundException("Your session is expired please login again");
 		}
 		Wallet w=wDao.getById(user.getMobile());
-		return null;
+		return aAccount.updateAccount(account, w);
+//		return null;
 	}
 }

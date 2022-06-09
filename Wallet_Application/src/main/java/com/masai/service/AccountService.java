@@ -28,6 +28,7 @@ public interface AccountService {
 	
 //	public Account sendMoneyUsingMobileNo(Wallet wallet1,Wallet Wallet2,double money) throws AccountException ;
 	
+	public Wallet updateAccount(String accountNo,Wallet w)throws AccountException;
 }
 
 

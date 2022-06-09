@@ -6,6 +6,8 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.masai.DTO.CustomerDTO;
 import com.masai.entity.Customer;
 import com.masai.entity.UserSession;
 import com.masai.entity.Wallet;
@@ -24,10 +26,6 @@ public class CustomerServiceImpl implements customerServiceIntr{
 	@Autowired
 	private WalletDaoJpa walletDao;
 	
-
-	
-
-
 	@Override
 	public Wallet showBlacnce(String mobile) throws CustomerNotFoundException {
 //			Optional<Customer> cust= wdo.findById(mobile);
@@ -50,14 +48,14 @@ public class CustomerServiceImpl implements customerServiceIntr{
 
 
 	@Override
-	public Customer createAcc(Customer cs)throws CustomerNotFoundException  {
-		Optional<Customer> opt=wdo.findById(cs.getMobileNumber());
+	public Customer createAcc(CustomerDTO cs)throws CustomerNotFoundException  {
+		Optional<Customer> opt=wdo.findById(cs.getMobileNo());
 		
 		if(opt.isPresent())
-			throw new CustomerNotFoundException("Customer is present already with this mobile number : "+cs.getMobileNumber());
-		Wallet wa=new Wallet(cs.getMobileNumber(),(double) 0,null);
+			throw new CustomerNotFoundException("Customer is present already with this mobile number : "+cs.getMobileNo());
+		Wallet wa=new Wallet(cs.getMobileNo(),(double) 0,null);
 		walletDao.save(wa);
-		return wdo.save(cs);
+		return wdo.save(new Customer(cs,wa));
 	}
 
 
@@ -65,19 +63,19 @@ public class CustomerServiceImpl implements customerServiceIntr{
 
 
 	@Override
-	public Customer updateCustomer(Customer customer, String num) throws CustomerNotFoundException {
-		if(customer.getMobileNumber().equals(num))
-			return wdo.save(customer);
+	public Customer updateCustomer(CustomerDTO customer, String num) throws CustomerNotFoundException {
+		if(customer.getMobileNo().equals(num))
+			return wdo.save(new Customer(customer,walletDao.getById(num)));
 		
-		Optional<Customer> opt=wdo.findById(customer.getMobileNumber());
+		Optional<Customer> opt=wdo.findById(customer.getMobileNo());
 		if(opt.isPresent()==false) {
 			wdo.delete(wdo.getById(num));
-			walletDao.findById(customer.getMobileNumber());
+			walletDao.findById(customer.getMobileNo());
 			Wallet w=walletDao.findById(num).get();
 			walletDao.delete(w);
-			w.setNumber(customer.getMobileNumber());
+			w.setNumber(customer.getMobileNo());
 			walletDao.save(w);
-			return wdo.save(customer);
+			return wdo.save(new Customer(customer,w));
 		}
 		else
 			throw new CustomerNotFoundException("Customer already present");
@@ -93,15 +91,6 @@ public class CustomerServiceImpl implements customerServiceIntr{
 	}
 
 
-
-
-
-
-
-
-
-
-	
 
 
 }

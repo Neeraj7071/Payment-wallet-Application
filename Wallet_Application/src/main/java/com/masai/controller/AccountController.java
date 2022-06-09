@@ -5,6 +5,11 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.security.auth.login.AccountException;
+import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -45,7 +50,7 @@ public class AccountController {
 	private WalletDaoJpa wDao;
 	
 	@PostMapping("/createAccount")
-	public ResponseEntity<AccountDTO> saveAccountHandler(@RequestParam("key") String key,@RequestBody AccountDTO account){
+	public ResponseEntity<AccountDTO> saveAccountHandler(@RequestParam("key") String key,@Valid@RequestBody AccountDTO account){
 		UserSession user=userDao.findByUuid(key);
 		if(user==null) {
 			throw new CustomerNotFoundException("You are not authoraised person please login first.");
@@ -92,7 +97,9 @@ public class AccountController {
 	
 	
 	@DeleteMapping("removeAccount/{accountNo}")
-	public AccountDTO deleteAccountHandler(@RequestParam("key") String key,@PathVariable("accountNo") String accountNo) throws AccountException{
+	public AccountDTO deleteAccountHandler(@RequestParam("key") String key,@Valid@PathVariable("accountNo") 
+	@Pattern(regexp = "^[0-9]{6,20}",message="Invalid Account Number Foramateaa")
+	String accountNo) throws AccountException{
 		UserSession user=userDao.findByUuid(key);
 		if(user==null) {
 			throw new CustomerNotFoundException("You are not authoraised person please login first.");
@@ -103,6 +110,7 @@ public class AccountController {
 			userDao.delete(user);
 			throw new CustomerNotFoundException("Your session is expired please login again");
 		}
+		
 		String number=user.getMobile();
 		Customer c=csi.findBymobileNumber(number);
 		return aAccount.deleteAccountByAccountNo(accountNo,wDao.getById(c.getMobileNumber()));	
@@ -115,7 +123,9 @@ public class AccountController {
 	
 	
 	@GetMapping("ViewAccount/{accountNo}")
-	public AccountDTO getAccountByaccountNo(@RequestParam("key") String key,@PathVariable("accountNo") String accountNo) throws AccountException{
+	public AccountDTO getAccountByaccountNo(@RequestParam("key") String key,@Valid@PathVariable("accountNo") 
+	@Pattern(regexp = "^[0-9]{6,20}",message="Invalid Account Number Foramateaa")
+	String accountNo) throws AccountException{
 		UserSession user=userDao.findByUuid(key);
 		if(user==null) {
 			throw new CustomerNotFoundException("You are not authoraised person please login first.");
