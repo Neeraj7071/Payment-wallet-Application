@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.masai.DTO.BillPaymentDTO;
+import com.masai.DTO.BillPaymentGetDTO;
 import com.masai.entity.BillPayment;
 import com.masai.entity.Customer;
 import com.masai.entity.UserSession;
@@ -45,7 +47,7 @@ public class BillPaymentController {
 	private WalletDaoJpa wDao;
 	
 	@PostMapping("/billpayment")
-	public ResponseEntity<BillPayment> payBill(@Valid @RequestBody BillPayment billPayment, @RequestParam("key") String key) {
+	public ResponseEntity<BillPaymentDTO> payBill(@Valid @RequestBody BillPaymentGetDTO billPayment, @RequestParam("key") String key) {
 		
 		UserSession user=userDao.findByUuid(key);
 		if(user==null) {
@@ -57,8 +59,8 @@ public class BillPaymentController {
 			userDao.delete(user);
 			throw new CustomerNotFoundException("Your session is expired please login again");
 		}
-		billPayment.setWallet(wDao.getById(user.getMobile()));
-		return new ResponseEntity<BillPayment>( billservices.payBillPayment(billPayment,key),HttpStatus.ACCEPTED);
+		BillPayment b=new BillPayment(billPayment,wDao.getById(user.getMobile()));
+		return new ResponseEntity<BillPaymentDTO>(new  BillPaymentDTO(billservices.payBillPayment(b,user.getMobile())),HttpStatus.ACCEPTED);
 		
 	}
 	

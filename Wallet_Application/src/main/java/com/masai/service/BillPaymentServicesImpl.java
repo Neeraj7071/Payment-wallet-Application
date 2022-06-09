@@ -20,6 +20,7 @@ import com.masai.repository.BillPaymentDao;
 import com.masai.repository.CustomerDao;
 import com.masai.repository.TransactionDao;
 import com.masai.repository.UserSessionDao;
+import com.masai.repository.WalletDaoJpa;
 
 
 	
@@ -30,20 +31,20 @@ public class BillPaymentServicesImpl implements BillPaymentServices {
 
 	@Autowired
 	private BillPaymentDao billpd;
-
-	
+	@Autowired
+	private TransactionDao tDao;
+	@Autowired
+	private WalletDaoJpa wDao;
 
     
 	
 	@Override
 	public BillPayment payBillPayment(BillPayment billPayment, String mob) {
+		Wallet w=wDao.getById(mob);
 		
-		
-		if(billPayment.getWallet().getBalance() <= billPayment.getAmount()) {
+		if(w.getBalance() < billPayment.getAmount()) {
 			throw new InsufficientAmountException("Insufficient amount in wallet");
 		}
-		
-		billPayment.getWallet().setBalance(billPayment.getWallet().getBalance()-billPayment.getAmount());
 		
 		billPayment.setPaymentDate(LocalDateTime.now());
 		Transaction myTransaction = new Transaction();
@@ -51,11 +52,12 @@ public class BillPaymentServicesImpl implements BillPaymentServices {
 		myTransaction.setDateTime(LocalDateTime.now());
 		myTransaction.setDescription(billPayment.getBillType());
 		myTransaction.setTransactionType("Debit");
-//		myTransaction.setMob(mob);
-		billpd.save(billPayment);
-		
+		myTransaction.setWallet(w);
+		tDao.save(myTransaction);
+		w.setBalance(w.getBalance()-billPayment.getAmount());
+		wDao.save(w);
 
-		return billPayment;
+		return billpd.save(billPayment);
 	}
 
 

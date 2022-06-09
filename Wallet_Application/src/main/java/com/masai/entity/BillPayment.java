@@ -10,6 +10,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
+import com.masai.DTO.BillPaymentDTO;
+import com.masai.DTO.BillPaymentGetDTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,7 +20,7 @@ import lombok.ToString;
 
 @Entity
 @Data
-@AllArgsConstructor
+//@AllArgsConstructor
 @NoArgsConstructor
 @ToString
 public class BillPayment {
@@ -32,4 +34,20 @@ public class BillPayment {
 	@ManyToOne(targetEntity = Wallet.class,cascade =CascadeType.ALL)
 	@JoinColumn(name="walletId")
 	private Wallet wallet;
+	/**
+	 * @param billId
+	 * @param billType
+	 * @param amount
+	 * @param paymentDate
+	 * @param wallet
+	 */
+	public BillPayment(BillPaymentGetDTO b,Wallet w) {
+		super();
+		this.billType = b.getBillType();
+		this.amount = b.getAmount();
+		this.paymentDate = LocalDateTime.now();
+		this.wallet = w;
+	}
+	
+	
 }
