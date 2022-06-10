@@ -50,7 +50,7 @@ public class TransactionController {
 	}
 	
 	@GetMapping("transactionsByType")
-	public ResponseEntity<List<TransactionDTO>> viewTransactionByType(@RequestParam("key") String key, @RequestBody String type){
+	public ResponseEntity<List<TransactionDTO>> viewTransactionByType(@RequestParam("key") String key, @RequestParam("type") String type){
 		UserSession user=userDao.findByUuid(key);
 		if(user==null) {
 			throw new CustomerNotFoundException("You are not authoraised person please login first.");

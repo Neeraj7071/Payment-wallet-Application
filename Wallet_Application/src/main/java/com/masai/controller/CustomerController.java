@@ -85,8 +85,8 @@ public class CustomerController {
 		
 		return new ResponseEntity<>(csi.getListCustomer(key),HttpStatus.OK);
 	}
-	@PatchMapping("/customers/update")
-	public ResponseEntity<Customer> updateAccount(@Valid @RequestBody CustomerDTO cs,@RequestParam("key") String key){
+	@PatchMapping("/customersupdate")
+	public ResponseEntity<Customer> updateAccount(@Valid@RequestBody CustomerDTO cs,@RequestParam("key") String key){
 		UserSession user=userDao.findByUuid(key);
 		if(user==null) {
 			throw new CustomerNotFoundException("You are not authoraised person please login first.");
@@ -98,7 +98,13 @@ public class CustomerController {
 			throw new CustomerNotFoundException("Your session is expired please login again");
 		}
 		Customer ucs=csi.updateCustomer(cs,user.getMobile());
-		return new ResponseEntity<>(ucs,HttpStatus.ACCEPTED);
+//		System.out.println(ucs);
+		return new ResponseEntity<> (ucs,HttpStatus.OK);
 	}
-
+	
+//	@PostMapping("userlogin")
+//	public ResponseEntity<UserSession> loginSession(@Valid @RequestBody LoginDTO cusD){
+//		
+//		return new ResponseEntity<>(login.loginService(cusD),HttpStatus.OK);
+//	}
 }

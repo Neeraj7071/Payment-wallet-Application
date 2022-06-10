@@ -7,5 +7,4 @@ import com.masai.entity.Wallet;
 
 @Repository
 public interface WalletDaoJpa extends JpaRepository<Wallet, String> {
-
 }

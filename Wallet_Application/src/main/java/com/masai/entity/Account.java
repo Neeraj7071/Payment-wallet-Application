@@ -26,7 +26,7 @@ import lombok.ToString;
 @Entity
 @Data
 @NoArgsConstructor
-//@AllArgsConstructor
+@AllArgsConstructor
 @ToString
 public class Account {
 	

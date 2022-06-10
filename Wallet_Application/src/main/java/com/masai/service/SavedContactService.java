@@ -28,19 +28,33 @@ public class SavedContactService implements SavedContactServiceInter {
 	@Autowired
 	private CustomerDao cDao;
 	@Override
-	public SavedContactDTO addBeneficiary(Wallet wallet, String name, String num) throws CustomerNotFoundException {
+	public SavedContactDTO addBeneficiary(Wallet wallet, String num, String name) throws CustomerNotFoundException {
 		SavedContact bene=new SavedContact();
 		bene.setMobileNo(num);
 		bene.setName(name);
 		bene.setWallet(wallet);
-		beneficiaryDao.save(bene);
-		return beneficiaryDao.findByWalletAndMobileNo(num, wallet);
+		List<SavedContactDTO> list=beneficiaryDao.findAllBywallet(wallet);
+		for(SavedContactDTO s:list) {
+//			System.out.println(s+num);
+			if(s.getMobileNo().equals(num))
+				throw new CustomerNotFoundException("user already present");
+		}
+		return new SavedContactDTO(beneficiaryDao.save(bene));
+		
 	}
 
 	@Override
 	public SavedContact deleteBeneficiary(Wallet wallet, String num) throws CustomerNotFoundException {
-		SavedContactDTO b=beneficiaryDao.findByWalletAndMobileNo(num, wallet);
-		return beneficiaryDao.deleteByWalletAndMobileNo(num, wallet);
+		List<SavedContact> list=beneficiaryDao.findBywallet(wallet);
+		for(SavedContact s:list) {
+			System.out.println(s+num);
+			if(s.getMobileNo().equals(num)) {
+				beneficiaryDao.delete(s);
+				return s;
+			}
+		}
+		throw new CustomerNotFoundException("Invalid Input");
+		
 	}
 
 	@Override
@@ -53,9 +67,9 @@ public class SavedContactService implements SavedContactServiceInter {
 	}
 
 	@Override
-	public List<SavedContact> viewAllBeneficiary(Wallet wallet) throws CustomerNotFoundException {
+	public List<SavedContactDTO> viewAllBeneficiary(Customer c) throws CustomerNotFoundException {
 		
-		return beneficiaryDao.findAllBywallet(wallet);
+		return beneficiaryDao.findAllBywallet(c.getWallet());
 	}
 
 	

@@ -66,7 +66,7 @@ public class BillPaymentController {
 	
 
 		@GetMapping("/bills")
-		public List<BillPayment> getAllBillPayment(@RequestParam("key") String key){
+		public List<BillPaymentDTO> getAllBillPayment(@RequestParam("key") String key){
 			UserSession user=userDao.findByUuid(key);
 			if(user==null) {
 				throw new CustomerNotFoundException("You are not authoraised person please login first.");

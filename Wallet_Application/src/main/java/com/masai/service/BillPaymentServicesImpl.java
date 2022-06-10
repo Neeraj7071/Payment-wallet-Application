@@ -10,6 +10,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.masai.DTO.BillPaymentDTO;
 import com.masai.entity.BillPayment;
 import com.masai.entity.Customer;
 import com.masai.entity.Transaction;
@@ -67,8 +68,8 @@ public class BillPaymentServicesImpl implements BillPaymentServices {
 
 
 	@Override
-	public List<BillPayment> viewBillPayment(Wallet w) throws CustomerNotFoundException {
-        List<BillPayment> bill = billpd.findByWallet(w);
+	public List<BillPaymentDTO> viewBillPayment(Wallet w) throws CustomerNotFoundException {
+        List<BillPaymentDTO> bill = billpd.findByWallet(w);
         return bill;
 	}
 

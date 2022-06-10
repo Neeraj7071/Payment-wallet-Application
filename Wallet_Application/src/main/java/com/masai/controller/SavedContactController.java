@@ -44,7 +44,7 @@ public class SavedContactController {
 	
 	
 	@PostMapping(value="/addContant")
-	public SavedContactDTO addContantRest(@RequestParam String mobile, @RequestParam("key") String key) throws CustomerNotFoundException {
+	public SavedContactDTO addContantRest(@RequestParam("mobile") String mobile, @RequestParam("key") String key) throws CustomerNotFoundException {
 		UserSession user=userDao.findByUuid(key);
 		if(user==null) {
 			throw new CustomerNotFoundException("You are not authoraised person please login first.");
@@ -58,20 +58,21 @@ public class SavedContactController {
 		
 		Optional<Customer> custo=customerDao.findById(user.getMobile());
 		Optional<Customer> custo2=customerDao.findById(mobile);
-		Wallet w=wDao.getById(custo2.get().getMobileNumber());
+//		Wallet w=wDao.getById(custo.get().getMobileNumber());
 		if(!custo2.isPresent())
 			throw new CustomerNotFoundException("This Customer detail not found in our database");
 		if(custo.get().getMobileNumber()==custo2.get().getMobileNumber())
 			throw new CustomerNotFoundException("You cann't insert same mobile number in beneficiary details");
 	
-		if(beneficiaryDao.findByWalletAndMobileNo(mobile,w)!=null)
-			throw new CustomerNotFoundException("This beneficiary already exits to your account");
+//		if(beneficiaryDao.findByWalletAndMobileNo(mobile,w)!=null)
+//			throw new CustomerNotFoundException("This beneficiary already exits to your account");
 		
 		return  savedContactService.addBeneficiary(wDao.getById(custo.get().getMobileNumber()), mobile,custo2.get().getName());
+//		return null;
 	}
 	
-	@DeleteMapping(value="/savedContant")
-	public SavedContact deleteContantRest(@RequestParam("phone") String phone, @RequestParam("key") String key) throws CustomerNotFoundException {
+	@DeleteMapping(value="/DeleteContant")
+	public SavedContactDTO deleteContantRest(@RequestParam("phone") String phone, @RequestParam("key") String key) throws CustomerNotFoundException {
 		
 		
 		UserSession user=userDao.findByUuid(key);
@@ -87,28 +88,25 @@ public class SavedContactController {
 		
 		Optional<Customer> cus=customerDao.findById(user.getMobile());
 		Wallet w=wDao.getById(cus.get().getMobileNumber());
-		return  savedContactService.deleteBeneficiary(w,phone);
+		return  new SavedContactDTO(savedContactService.deleteBeneficiary(w,phone));
 	}
 
 	
 	
-	@GetMapping(value="/savedContant/view/")
-	public SavedContactDTO viewContactRest(@RequestParam String mobileNumber) throws CustomerNotFoundException {
+	@GetMapping(value="/ViewContant")
+	public SavedContactDTO viewContactRest(@RequestParam("mobileNumber") String mobileNumber) throws CustomerNotFoundException {
 		
 		Optional<Customer> c=customerDao.findById(mobileNumber);
 		if(c.isPresent()) {
-			return savedContactService.viewBeneficiary(mobileNumber);
+			return new SavedContactDTO(mobileNumber,c.get().getName());
 		}
 		throw new CustomerNotFoundException("Invalid Number");
 		
 	}
 	
 	
-	@PostMapping(value="/ViewAllSavedContant")
-		public List<SavedContact> viewAllsavedContant(@RequestParam("key") String key) throws CustomerNotFoundException {
-		// TODO Auto-generated method stub
-		
-		
+	@GetMapping(value="/ViewAllSavedContant")
+		public List<SavedContactDTO> viewAllsavedContant(@RequestParam("key") String key) throws CustomerNotFoundException {	
 		
 		UserSession user=userDao.findByUuid(key);
 		if(user==null) {
@@ -125,7 +123,7 @@ public class SavedContactController {
 		Optional<Customer> cusopt=customerDao.findById(user.getMobile());
 		Customer customer=cusopt.get();
 		
-			return savedContactService.viewAllBeneficiary(wDao.getById(customer.getMobileNumber()));
+			return savedContactService.viewAllBeneficiary(customer);
 		
 	}
 	

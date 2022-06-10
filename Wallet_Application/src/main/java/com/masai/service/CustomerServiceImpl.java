@@ -64,21 +64,23 @@ public class CustomerServiceImpl implements customerServiceIntr{
 
 	@Override
 	public Customer updateCustomer(CustomerDTO customer, String num) throws CustomerNotFoundException {
-		if(customer.getMobileNo().equals(num))
-			return wdo.save(new Customer(customer,walletDao.getById(num)));
-		
-		Optional<Customer> opt=wdo.findById(customer.getMobileNo());
-		if(opt.isPresent()==false) {
-			wdo.delete(wdo.getById(num));
-			walletDao.findById(customer.getMobileNo());
-			Wallet w=walletDao.findById(num).get();
-			walletDao.delete(w);
-			w.setNumber(customer.getMobileNo());
-			walletDao.save(w);
-			return wdo.save(new Customer(customer,w));
+		if(customer.getMobileNo().equals(num)) {
+			wdo.save(new Customer(customer,walletDao.getById(num)));			
+			Optional<Customer> opt=wdo.findById(customer.getMobileNo());
+			return opt.get();
 		}
-		else
-			throw new CustomerNotFoundException("Customer already present");
+//		if(opt.isPresent()==false) {
+//			wdo.delete(wdo.getById(num));
+//			walletDao.findById(customer.getMobileNo());
+//			Wallet w=walletDao.findById(num).get();
+//			walletDao.delete(w);
+//			w.setNumber(customer.getMobileNo());
+//			walletDao.save(w);
+//			return wdo.save(new Customer(customer,w));
+//		}
+//		else
+		throw new CustomerNotFoundException("Customer Mobile number could not be change");
+//			throw new CustomerNotFoundException("Customer already present");
 	}
 
 
